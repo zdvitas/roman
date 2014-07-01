@@ -23,20 +23,24 @@ namespace Roman
 
 
 			string[] text = System.IO.File.ReadAllLines("CATALOG.COL");
+
 			for(int j = 0; j< text.Length; j++){
 				for(int i = 0; i < 5; i++)
 				{
 					text[j] = text[j].Replace("  "," " );
 				}
-				text[j] = text[j].Remove(0,1);
+				if(text[j][0] == ' ')
+					text[j] = text[j].Remove(0,1);
 			}
 
 			
 			List<string> new_text = new List<string>();
 
 			new_text.Add(text[0]);
+
 			string cur_string="";
 			int max_rang = int.MaxValue;
+
 			for(int i=1; i< text.Length; i++)
 			{
 				var tmp = text[i].Split(' ');
@@ -55,7 +59,7 @@ namespace Roman
 						{
 							if(j<max_rang)
 							{
-								cur_string = text[i];
+								cur_string ="  " + text[i];
 								max_rang = j;
 							}
 						}

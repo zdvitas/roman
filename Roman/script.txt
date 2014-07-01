@@ -1,0 +1,1 @@
+cat CATALOG.COL | grep  [a-z] | awk -F " " '{print $7}' | cut -c 1-3 | sort | uniq
