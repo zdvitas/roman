@@ -14,13 +14,15 @@ namespace Roman
 			string[] rang_1 = {"ave","ccc","chi","den","dze","hod"};
 			string[] rang_2 = {"hrv","mcd","mgk","mos","nis"};
 			string[] rang_3 = {"oth","riz","rud","sip","yng"};
+		
 
 			List<string[]> rangs = new List<string[]>();
 			rangs.Add(rang_1);
 			rangs.Add(rang_2);
 			rangs.Add(rang_3);
 
-			string[] text = System.IO.File.ReadAllLines(@"/home/zdvitas/CATALOG.COL");
+
+			string[] text = System.IO.File.ReadAllLines("CATALOG.COL");
 			for(int j = 0; j< text.Length; j++){
 				for(int i = 0; i < 5; i++)
 				{
