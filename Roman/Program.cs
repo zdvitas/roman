@@ -13,8 +13,8 @@ namespace Roman
 		public static void Main (string[] args)
 		{
 			string[] rang_1 = {"ave","ccc","chi","den","dze","hod"};
-			string[] rang_2 = {"hrv","mcd","mgk","mos","nis"};
-			string[] rang_3 = {"oth","riz","rud","sip","yng"};
+			string[] rang_2 = {"hrv","mcd","mgk","mos","nis","mostr"};
+			string[] rang_3 = {"oth","riz","rud","sip","yng","sip","rudik1","rudik2"};
 		
 
 			List<string[]> rangs = new List<string[]>();
@@ -47,6 +47,7 @@ namespace Roman
 				var tmp = text[i].Split(' ');
 				if(tmp.Length == 12)
 				{
+				
 					new_text[new_text.Count-1] +=cur_string ;
 					cur_string = "";
 					new_text.Add(text[i]);
@@ -54,6 +55,8 @@ namespace Roman
 				} else
 				{
 					string status = tmp[6].Split('-')[0];
+					status = status.Split('_')[0];
+
 					for(int j = 0; j < rangs.Count; j++)
 					{
 						if (Array.IndexOf(rangs[j] , status) >= 0)
@@ -74,7 +77,7 @@ namespace Roman
 			}
 
 			System.IO.File.WriteAllLines("new_text.txt",new_text);
-			Func();
+			//Func();
 
 
 
