@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 
 
-
 namespace Roman
 {
 	class MainClass
 	{
-	
 
 		public static void Main (string[] args)
 		{
@@ -47,7 +45,7 @@ namespace Roman
 				var tmp = text[i].Split(' ');
 				if(tmp.Length == 12)
 				{
-				
+
 					new_text[new_text.Count-1] +=cur_string ;
 					cur_string = "";
 					new_text.Add(text[i]);
@@ -76,8 +74,9 @@ namespace Roman
 
 			}
 
-			System.IO.File.WriteAllLines("new_text.txt",new_text);
-			//Func();
+
+			//System.IO.File.WriteAllLines("new_text.txt",new_text);
+			Func();
 
 
 
@@ -85,9 +84,9 @@ namespace Roman
 
 
 		public static void Func(){
-			DateTime time;
-			time = DateTime.Parse("01/03/2008 07:00:00");
-			Console.Write (time.ToString ());
+
+
+
 			string[] text1 = System.IO.File.ReadAllLines("new_text.txt");
 			string[] text2 = System.IO.File.ReadAllLines("Tibet1.txt");
 
@@ -99,6 +98,8 @@ namespace Roman
 			List<string> rez = new List<string> ();
 			List<DateTime> Times = new List<DateTime> ();
 
+
+			// Костыль на кривую дату
 			for (int i = 0; i < text1.Length; i++) {
 				string[] tmp = text1 [i].Split (' ');
 
@@ -121,9 +122,10 @@ namespace Roman
 					tmp [7] = "0"; 
 				}
 
-
+				// Преобразуем дату в читаьельный формат
 				string date = tmp  [4] + "/" + tmp  [3] + "/" + tmp  [2] + " " +
 					tmp  [5] + ":" + tmp [6] + ":" + tmp [7];
+				// парсим дату
 				try
 				{
 				Times.Add (DateTime.Parse (date));
@@ -143,30 +145,68 @@ namespace Roman
 
 
 
-
+			//
+			List<DateTime> Times2 = new List<DateTime> ();
 			for (int i = 0; i < text2.Length; i++) {
-				var tmp = text2 [i].Split ('\t');
+				text2[i] = text2 [i].Replace ('\t' ,' ');
+				var tmp = text2 [i].Split (' ');
 				list2.Add (text2[i]);
 
 				string date = tmp [3] + "/" + tmp [2] + "/" + tmp  [1] + " " +
 					tmp  [4] + ":" + tmp [5] + ":" + tmp [6];
-
-				Times.Add (DateTime.Parse (date));
+				Times2.Add (DateTime.Parse (date));
 
 			}
 
 
 			rez.AddRange (list1);
-			rez.AddRange (list2);
+			List<DateTime> rezTime = new List<DateTime> ();
+			rezTime.AddRange (Times);
+			// Это тупое прихуячивание
+			//rez.AddRange (list2);
+
+			// Прихуячиваем второй список к первому
+			int count_collisons = 0;
+			bool flag = false;
+			int index = 0;
+			for (int i = 0; i < Times2.Count; i++) {
+				flag = true;
+				for (int j = 0; j < Times.Count; j++) {
+					if (test_events (text1 [j], text2 [i], Times [j], Times2 [i])) {
+						// Значит что события произошли в одно время
+						index = j;    /// ИНдекс события из первого списка
+						flag = false;
+						break;
+
+					}	
+
+				}
+
+
+				if (flag) {
+					rez.Add (text2 [i]);
+					rezTime.Add (Times2 [i]);
+					count_collisons ++;
+				} else {
+					rez [index] = text2 [i];
+					Times [index] = Times2 [i];
+				}
 
 
 
-			for (int i = 0; i < Times.Count; i ++)
-				for (int j = 0; j< Times.Count-i -1; j++) {
-					if (Times [j] > Times [j + 1]) {
-						var tmp1 = Times [j];
-						Times [j] = Times [j + 1];
-						Times [j + 1] = tmp1;
+
+
+			}
+
+
+
+			// Сортировка по времени поидее нах не нужна
+			for (int i = 0; i < rezTime.Count; i ++)
+			for (int j = 0; j< rezTime.Count-i -1; j++) {
+				if (rezTime [j] > rezTime [j + 1]) {
+					var tmp1 = rezTime [j];
+					rezTime [j] = rezTime [j + 1];
+					rezTime [j + 1] = tmp1;
 
 						var tmp2 = rez [j];
 						rez [j] = rez [j + 1];
@@ -177,9 +217,27 @@ namespace Roman
 
 
 			System.IO.File.WriteAllLines("new_text2.txt",rez);
+			Console.WriteLine (count_collisons);
+		}
+		
+		public static bool test_events(string event1 , string event2 , DateTime time1 , DateTime time2){
+			var event1_colums = event1.Split (' ');
+			var event2_colums = event2.Split ('\t');
+			TimeSpan dt;
 
+			if (time1 > time2)
+				dt = time1 - time2;
+			else
+				dt = time2 - time1;
+
+			if (dt.TotalMinutes < 2)
+				return true;
+			else 
+				return false;
 		}
 
 
 	}
+
+
 }
