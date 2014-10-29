@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Globalization;
 
 
 namespace Roman
@@ -166,7 +167,7 @@ namespace Roman
 			//rez.AddRange (list2);
 
 			// Прихуячиваем второй список к первому
-			int count_collisons = 0;
+			int count_collisons = 0;   /// Эта переменная считает количество замещений
 			bool flag = false;
 			int index = 0;
 			for (int i = 0; i < Times2.Count; i++) {
@@ -184,10 +185,17 @@ namespace Roman
 
 
 				if (flag) {
+
 					rez.Add (text2 [i]);
 					rezTime.Add (Times2 [i]);
-					count_collisons ++;
+		
+
 				} else {
+					// Сейчас будем заменять
+					count_collisons ++;
+					Console.WriteLine ("From: \t" + rez [index]);
+					Console.WriteLine (" To : \t" + text2 [i]); // Пишет в консоль на что заменяем
+					Console.WriteLine("--------------------------");
 					rez [index] = text2 [i];
 					Times [index] = Times2 [i];
 				}
@@ -200,7 +208,7 @@ namespace Roman
 
 
 
-			// Сортировка по времени поидее нах не нужна
+			// Сортировка по времени 
 			for (int i = 0; i < rezTime.Count; i ++)
 			for (int j = 0; j< rezTime.Count-i -1; j++) {
 				if (rezTime [j] > rezTime [j + 1]) {
@@ -222,18 +230,35 @@ namespace Roman
 		
 		public static bool test_events(string event1 , string event2 , DateTime time1 , DateTime time2){
 			var event1_colums = event1.Split (' ');
-			var event2_colums = event2.Split ('\t');
-			TimeSpan dt;
+			var event2_colums = event2.Split (' ');
+			var mag1 = float.Parse (event1_colums [8], CultureInfo.InvariantCulture);
+			var mag2 = float.Parse (event2_colums [7], CultureInfo.InvariantCulture);
+			float d_mag = 0.5f;
+			var depth1 = float.Parse (event1_colums [9], CultureInfo.InvariantCulture);
+			var depth2 = float.Parse (event2_colums [8], CultureInfo.InvariantCulture);
+			float d_depth = 20.0f;
+			var cord1_1 = float.Parse (event1_colums [10], CultureInfo.InvariantCulture);
+			var cord1_2 = float.Parse (event1_colums [11], CultureInfo.InvariantCulture);
 
+			var cord2_1 = float.Parse (event1_colums [9], CultureInfo.InvariantCulture);
+			var cord2_2 = float.Parse (event1_colums [10], CultureInfo.InvariantCulture);
+			float d_cord = 0.2f;
+
+			TimeSpan dt;
+			//return false; // НИкогда не заменяет
 			if (time1 > time2)
 				dt = time1 - time2;
 			else
 				dt = time2 - time1;
 
-			if (dt.TotalMinutes < 2)
+			if (dt.TotalSeconds <= 3)
+
+			if (Math.Abs (mag1 - mag2) < d_mag) // Магнитуда
+			if (Math.Abs (depth1 - depth2) < d_depth) // Гулибна
+			if ((Math.Abs (cord1_1 - cord2_1) < d_cord) && (Math.Abs (cord1_2 - cord2_2) < d_cord))
 				return true;
-			else 
-				return false;
+
+			return false;
 		}
 
 
