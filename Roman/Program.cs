@@ -6,6 +6,17 @@ using System.Globalization;
 
 namespace Roman
 {
+	public class Event {
+		public string data;
+		public DateTime time;
+		public string[] columns;
+
+		public Event()
+		{
+		}
+	}
+
+
 	class MainClass
 	{
 
@@ -16,12 +27,12 @@ namespace Roman
 			string[] rang_3 = {"oth","riz","rud","sip","yng","sip","rudik1","rudik2"};
 		
 
-			List<string[]> rangs = new List<string[]>();
+		/*	List<string[]> rangs = new List<string[]>();
 			rangs.Add(rang_1);
 			rangs.Add(rang_2);
 			rangs.Add(rang_3);
 
-
+			#region
 			string[] text = System.IO.File.ReadAllLines("CATALOG.COL");
 
 			for(int j = 0; j< text.Length; j++){
@@ -73,7 +84,7 @@ namespace Roman
 
 
 
-			}
+			} */
 
 
 			//System.IO.File.WriteAllLines("new_text.txt",new_text);
@@ -93,13 +104,12 @@ namespace Roman
 
 			List<string> str_rez = new List<string> ();
 
+			List<Event> EventList1 = new List<Event> ();
+			List<Event> EventList2 = new List<Event> ();
+			List<Event> rez_event = new List<Event> ();
 
-			List<string> list1 = new List<string> ();
-			List<string> list2 = new List<string> ();
 			List<string> rez = new List<string> ();
-			List<DateTime> Times = new List<DateTime> ();
-
-
+		
 			// Костыль на кривую дату
 			for (int i = 0; i < text1.Length; i++) {
 				string[] tmp = text1 [i].Split (' ');
@@ -129,7 +139,7 @@ namespace Roman
 				// парсим дату
 				try
 				{
-				Times.Add (DateTime.Parse (date));
+				DateTime.Parse (date);
 				}
 				catch {
 					tmp[0] = "";
@@ -137,8 +147,11 @@ namespace Roman
 				}
 				finally{
 					if (tmp [0] != "") {
-						text1 [i].Replace (' ', '\t');
-						list1.Add (text1 [i]);
+						Event t = new Event();
+						t.data = text1 [i];
+						t.time = DateTime.Parse (date);
+						t.columns = tmp;
+						EventList1.Add (t);
 					}
 					//Console.WriteLine(date);
 				}
@@ -151,18 +164,24 @@ namespace Roman
 			for (int i = 0; i < text2.Length; i++) {
 				text2[i] = text2 [i].Replace ('\t' ,' ');
 				var tmp = text2 [i].Split (' ');
-				list2.Add (text2[i]);
+
 
 				string date = tmp [3] + "/" + tmp [2] + "/" + tmp  [1] + " " +
 					tmp  [4] + ":" + tmp [5] + ":" + tmp [6];
-				Times2.Add (DateTime.Parse (date));
 
+
+				Event t = new Event();
+				t.data = text2 [i];
+				t.time = DateTime.Parse (date);
+				t.columns = tmp;
+				EventList2.Add (t);
 			}
 
 
-			rez.AddRange (list1);
-			List<DateTime> rezTime = new List<DateTime> ();
-			rezTime.AddRange (Times);
+
+			rez_event.AddRange (EventList1);
+
+		
 			// Это тупое прихуячивание
 			//rez.AddRange (list2);
 
@@ -170,10 +189,10 @@ namespace Roman
 			int count_collisons = 0;   /// Эта переменная считает количество замещений
 			bool flag = false;
 			int index = 0;
-			for (int i = 0; i < Times2.Count; i++) {
+			for (int i = 0; i < EventList2.Count; i++) {
 				flag = true;
-				for (int j = 0; j < Times.Count; j++) {
-					if (test_events (text1 [j], text2 [i], Times [j], Times2 [i])) {
+				for (int j = 0; j < EventList1.Count; j++) {
+					if (test_events (EventList1[j] , EventList2[i])) {
 						// Значит что события произошли в одно время
 						index = j;    /// ИНдекс события из первого списка
 						flag = false;
@@ -185,19 +204,17 @@ namespace Roman
 
 
 				if (flag) {
-
-					rez.Add (text2 [i]);
-					rezTime.Add (Times2 [i]);
-		
+					rez_event.Add (EventList2 [i]);
+	
 
 				} else {
 					// Сейчас будем заменять
 					count_collisons ++;
-					Console.WriteLine ("From: \t" + rez [index]);
-					Console.WriteLine (" To : \t" + text2 [i]); // Пишет в консоль на что заменяем
+					Console.WriteLine ("From: \t" + rez_event [index].data);
+					Console.WriteLine (" To : \t" + EventList2 [i].data); // Пишет в консоль на что заменяем
 					Console.WriteLine("--------------------------");
-					rez [index] = text2 [i];
-					Times [index] = Times2 [i];
+					rez_event [index] = EventList2 [i];
+
 				}
 
 
@@ -209,47 +226,46 @@ namespace Roman
 
 
 			// Сортировка по времени 
-			for (int i = 0; i < rezTime.Count; i ++)
-			for (int j = 0; j< rezTime.Count-i -1; j++) {
-				if (rezTime [j] > rezTime [j + 1]) {
-					var tmp1 = rezTime [j];
-					rezTime [j] = rezTime [j + 1];
-					rezTime [j + 1] = tmp1;
-
-						var tmp2 = rez [j];
-						rez [j] = rez [j + 1];
-						rez [j + 1] = tmp2;
+			for (int i = 0; i < rez_event.Count; i ++)
+			for (int j = 0; j< rez_event.Count-i -1; j++) {
+				if (rez_event [j].time > rez_event [j + 1].time) {
+					var tmp1 = rez_event [j];
+					rez_event [j] = rez_event [j + 1];
+					rez_event [j + 1] = tmp1;
 					}
 				}
 
+			for (int i = 0; i < rez_event.Count; i++) {
+				rez.Add (rez_event [i].data);
+			}
 
 
 			System.IO.File.WriteAllLines("new_text2.txt",rez);
 			Console.WriteLine (count_collisons);
 		}
-		
-		public static bool test_events(string event1 , string event2 , DateTime time1 , DateTime time2){
-			var event1_colums = event1.Split (' ');
-			var event2_colums = event2.Split (' ');
-			var mag1 = float.Parse (event1_colums [8].Replace('.',','));
-			var mag2 = float.Parse (event2_colums [7].Replace('.',','));
-			float d_mag = 0.5f;
-			var depth1 = float.Parse (event1_colums [9].Replace('.',','));
-			var depth2 = float.Parse (event2_colums [8].Replace('.',','));
-			float d_depth = 20.0f;
-			var cord1_1 = float.Parse (event1_colums [10].Replace('.',','));
-			var cord1_2 = float.Parse (event1_colums [11].Replace('.',','));
 
-			var cord2_1 = float.Parse (event1_colums [9].Replace('.',','));
-			var cord2_2 = float.Parse (event1_colums [10].Replace('.',','));
+
+		public static bool test_events(Event event1 , Event event2){
+
+			var mag1 = float.Parse (event1.columns [8].Replace('.',','));
+			var mag2 = float.Parse (event2.columns [7].Replace('.',','));
+			float d_mag = 0.5f;
+			var depth1 = float.Parse (event1.columns [9].Replace('.',','));
+			var depth2 = float.Parse (event2.columns [8].Replace('.',','));
+			float d_depth = 20.0f;
+			var cord1_1 = float.Parse (event1.columns [10].Replace('.',','));
+			var cord1_2 = float.Parse (event1.columns [11].Replace('.',','));
+
+			var cord2_1 = float.Parse (event1.columns [9].Replace('.',','));
+			var cord2_2 = float.Parse (event1.columns [10].Replace('.',','));
 			float d_cord = 0.2f;
 
 			TimeSpan dt;
 			//return false; // НИкогда не заменяет
-			if (time1 > time2)
-				dt = time1 - time2;
+			if (event1.time > event2.time)
+				dt = event1.time - event2.time;
 			else
-				dt = time2 - time1;
+				dt = event2.time - event1.time;
 
 			if (dt.TotalSeconds <= 3)
 
