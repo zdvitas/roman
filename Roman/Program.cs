@@ -231,17 +231,17 @@ namespace Roman
 		public static bool test_events(string event1 , string event2 , DateTime time1 , DateTime time2){
 			var event1_colums = event1.Split (' ');
 			var event2_colums = event2.Split (' ');
-			var mag1 = float.Parse (event1_colums [8], CultureInfo.InvariantCulture);
-			var mag2 = float.Parse (event2_colums [7], CultureInfo.InvariantCulture);
+			var mag1 = float.Parse (event1_colums [8].Replace('.',','));
+			var mag2 = float.Parse (event2_colums [7].Replace('.',','));
 			float d_mag = 0.5f;
-			var depth1 = float.Parse (event1_colums [9], CultureInfo.InvariantCulture);
-			var depth2 = float.Parse (event2_colums [8], CultureInfo.InvariantCulture);
+			var depth1 = float.Parse (event1_colums [9].Replace('.',','));
+			var depth2 = float.Parse (event2_colums [8].Replace('.',','));
 			float d_depth = 20.0f;
-			var cord1_1 = float.Parse (event1_colums [10], CultureInfo.InvariantCulture);
-			var cord1_2 = float.Parse (event1_colums [11], CultureInfo.InvariantCulture);
+			var cord1_1 = float.Parse (event1_colums [10].Replace('.',','));
+			var cord1_2 = float.Parse (event1_colums [11].Replace('.',','));
 
-			var cord2_1 = float.Parse (event1_colums [9], CultureInfo.InvariantCulture);
-			var cord2_2 = float.Parse (event1_colums [10], CultureInfo.InvariantCulture);
+			var cord2_1 = float.Parse (event1_colums [9].Replace('.',','));
+			var cord2_2 = float.Parse (event1_colums [10].Replace('.',','));
 			float d_cord = 0.2f;
 
 			TimeSpan dt;
@@ -255,7 +255,7 @@ namespace Roman
 
 			if (Math.Abs (mag1 - mag2) < d_mag) // Магнитуда
 			if (Math.Abs (depth1 - depth2) < d_depth) // Гулибна
-			if ((Math.Abs (cord1_1 - cord2_1) < d_cord) && (Math.Abs (cord1_2 - cord2_2) < d_cord))
+			if ((Math.Abs (cord1_1 - cord2_1) < d_cord) && (Math.Abs (cord1_2 - cord2_2) < d_cord)) // Координаты
 				return true;
 
 			return false;
