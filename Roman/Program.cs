@@ -190,6 +190,8 @@ namespace Roman
 			bool flag = false;
 			int index = 0;
 			for (int i = 0; i < EventList2.Count; i++) {
+				Console.Clear ();
+				Console.Write ("Progress : "+i.ToString() + "/" + EventList2.Count.ToString());
 				flag = true;
 				for (int j = 0; j < EventList1.Count; j++) {
 					if (test_events (EventList1[j] , EventList2[i])) {
