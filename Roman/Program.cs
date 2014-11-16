@@ -27,12 +27,12 @@ namespace Roman
 			string[] rang_3 = {"oth","riz","rud","sip","yng","sip","rudik1","rudik2"};
 		
 
-		/*	List<string[]> rangs = new List<string[]>();
+			List<string[]> rangs = new List<string[]>();
 			rangs.Add(rang_1);
 			rangs.Add(rang_2);
 			rangs.Add(rang_3);
 
-			#region
+
 			string[] text = System.IO.File.ReadAllLines("CATALOG.COL");
 
 			for(int j = 0; j< text.Length; j++){
@@ -58,7 +58,7 @@ namespace Roman
 				if(tmp.Length == 12)
 				{
 
-					new_text[new_text.Count-1] +=cur_string ;
+					new_text[new_text.Count-1] +=" " + cur_string ;
 					cur_string = "";
 					new_text.Add(text[i]);
 					max_rang = int.MaxValue;
@@ -84,11 +84,11 @@ namespace Roman
 
 
 
-			} */
+			} 
 
 
-			//System.IO.File.WriteAllLines("new_text.txt",new_text);
-			Func();
+			System.IO.File.WriteAllLines("new_text.txt",new_text);
+			//Func();
 
 
 
