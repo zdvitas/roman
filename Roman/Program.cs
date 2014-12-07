@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Globalization;
+using System.Threading;
 
 
 namespace Roman
@@ -179,8 +180,8 @@ namespace Roman
 		public static void Main (string[] args)
 		{
 			//make_new_text ();
-			//Func();
-			restrict_new_text ();
+			Func();
+			//restrict_new_text ();
 
 
 
@@ -191,22 +192,22 @@ namespace Roman
 
 
 
-			string[] text1 = System.IO.File.ReadAllLines("new_text.txt");
-			string[] text2 = System.IO.File.ReadAllLines("Tibet1.txt");
+			string[] TB_text = System.IO.File.ReadAllLines("TB.txt");
+			string[] Tibet_text = System.IO.File.ReadAllLines("Tibet1.txt");
 
 			List<string> str_rez = new List<string> ();
 
-			List<Event> EventList1 = new List<Event> ();
-			List<Event> EventList2 = new List<Event> ();
+			List<Event> Event_TB = new List<Event> ();
+			List<Event> Event_Tibet = new List<Event> ();
 			List<Event> rez_event = new List<Event> ();
 
 			List<string> rez = new List<string> ();
 		
-			// Костыль на кривую дату
-			for (int i = 0; i < text1.Length; i++) {
-				string[] tmp = text1 [i].Split (' ');
-
-				if (tmp  [2].Length == 1) {
+			// Prepare date
+			for (int i = 0; i < TB_text.Length; i++) {
+				string[] tmp = TB_text [i].Split ('\t');
+				// Костыль на кривую дату
+				/*if (tmp  [2].Length == 1) {
 					tmp  [2] = "190" + tmp  [2];
 				} else
 					tmp  [2] = "19" + tmp  [2];
@@ -223,11 +224,11 @@ namespace Roman
 				
 				if (tmp  [7] == "-1") {
 					tmp [7] = "0"; 
-				}
+				}*/
 
 				// Преобразуем дату в читаьельный формат
-				string date = tmp  [4] + "/" + tmp  [3] + "/" + tmp  [2] + " " +
-					tmp  [5] + ":" + tmp [6] + ":" + tmp [7];
+				string date = tmp  [3] + "/" + tmp  [2] + "/" + tmp  [1] + " " +
+					tmp  [4] + ":" + tmp [5] + ":" + tmp [6];
 				// парсим дату
 				try
 				{
@@ -240,10 +241,10 @@ namespace Roman
 				finally{
 					if (tmp [0] != "") {
 						Event t = new Event();
-						t.data = text1 [i];
+						t.data = TB_text [i];
 						t.time = DateTime.Parse (date);
 						t.columns = tmp;
-						EventList1.Add (t);
+						Event_TB.Add (t);
 					}
 					//Console.WriteLine(date);
 				}
@@ -252,10 +253,10 @@ namespace Roman
 
 
 			//
-			List<DateTime> Times2 = new List<DateTime> ();
-			for (int i = 0; i < text2.Length; i++) {
-				text2[i] = text2 [i].Replace ('\t' ,' ');
-				var tmp = text2 [i].Split (' ');
+
+			for (int i = 0; i < Tibet_text.Length; i++) {
+				Tibet_text[i] = Tibet_text [i].Replace ('\t' ,' ');
+				var tmp = Tibet_text [i].Split (' ');
 
 
 				string date = tmp [3] + "/" + tmp [2] + "/" + tmp  [1] + " " +
@@ -263,15 +264,15 @@ namespace Roman
 
 
 				Event t = new Event();
-				t.data = text2 [i];
+				t.data = Tibet_text [i];
 				t.time = DateTime.Parse (date);
 				t.columns = tmp;
-				EventList2.Add (t);
+				Event_Tibet.Add (t);
 			}
 
 
 
-			rez_event.AddRange (EventList1);
+			rez_event.AddRange (Event_TB);
 
 		
 			// Это тупое прихуячивание
@@ -281,12 +282,13 @@ namespace Roman
 			int count_collisons = 0;   /// Эта переменная считает количество замещений
 			bool flag = false;
 			int index = 0;
-			for (int i = 0; i < EventList2.Count; i++) {
+			for (int i = 0; i < Event_Tibet.Count; i++) {
 				Console.Clear ();
-				Console.Write ("Progress : "+i.ToString() + "/" + EventList2.Count.ToString());
+				Console.WriteLine ("Progress : "+i.ToString() + "/" + Event_Tibet.Count.ToString());
+				Console.WriteLine ("Colision count : " + count_collisons.ToString());
 				flag = true;
-				for (int j = 0; j < EventList1.Count; j++) {
-					if (test_events (EventList1[j] , EventList2[i])) {
+				for (int j = 0; j < Event_TB.Count; j++) {
+					if (test_events (Event_TB[j] , Event_Tibet[i])) {
 						// Значит что события произошли в одно время
 						index = j;    /// ИНдекс события из первого списка
 						flag = false;
@@ -298,16 +300,18 @@ namespace Roman
 
 
 				if (flag) {
-					rez_event.Add (EventList2 [i]);
+					Event_Tibet [i].data = "*** \t" + Event_Tibet[i].data; // Вот это закоментить
+					rez_event.Add (Event_Tibet [i]);
 	
 
 				} else {
 					// Сейчас будем заменять
 					count_collisons ++;
 					Console.WriteLine ("From: \t" + rez_event [index].data);
-					Console.WriteLine (" To : \t" + EventList2 [i].data); // Пишет в консоль на что заменяем
+					Console.WriteLine (" To : \t" + Event_Tibet [i].data); // Пишет в консоль на что заменяем
 					Console.WriteLine("--------------------------");
-					rez_event [index] = EventList2 [i];
+					Thread.Sleep (1000);
+					rez_event [index] = Event_Tibet [i];
 
 				}
 
@@ -336,22 +340,24 @@ namespace Roman
 
 
 			System.IO.File.WriteAllLines("new_text2.txt",rez);
-			Console.WriteLine (count_collisons);
+			Console.WriteLine("--------------------");
+			Console.WriteLine ("Colissions count = " + count_collisons.ToString());
 		}
 
 
 		public static bool test_events(Event event1 , Event event2){
 
-			var mag1 = float.Parse (event1.columns [8].Replace('.',','));
+			float dt_float = 120f;
+			var mag1 = float.Parse (event1.columns [7].Replace('.',','));
 			var mag2 = float.Parse (event2.columns [7].Replace('.',','));
 			float d_mag = 0.5f;
-			var depth1 = float.Parse (event1.columns [9].Replace('.',','));
-			var depth2 = float.Parse (event2.columns [8].Replace('.',','));
+			var depth1 = float.Parse (event1.columns [12].Replace('.',','));
+			var depth2 = float.Parse (event2.columns [12].Replace('.',','));
 			float d_depth = 20.0f;
-			var cord1_1 = float.Parse (event1.columns [10].Replace('.',','));
+			var cord1_1 = float.Parse (event1.columns [11].Replace('.',','));
 			var cord1_2 = float.Parse (event1.columns [11].Replace('.',','));
 
-			var cord2_1 = float.Parse (event1.columns [9].Replace('.',','));
+			var cord2_1 = float.Parse (event1.columns [10].Replace('.',','));
 			var cord2_2 = float.Parse (event1.columns [10].Replace('.',','));
 			float d_cord = 0.2f;
 
@@ -362,7 +368,7 @@ namespace Roman
 			else
 				dt = event2.time - event1.time;
 
-			if (dt.TotalSeconds <= 3)
+			if (dt.TotalSeconds <= dt_float)
 
 			if (Math.Abs (mag1 - mag2) < d_mag) // Магнитуда
 			if (Math.Abs (depth1 - depth2) < d_depth) // Гулибна
