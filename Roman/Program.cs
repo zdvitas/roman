@@ -75,7 +75,8 @@ namespace Roman
 				var tmp = Tibet_text [i].Split ('\t');
 
 				if (tmp [6] == "60") {
-					tmp [6] = "0";
+					tmp [6] = "59";
+
 				}
 				string date = tmp [3] + "/" + tmp [2] + "/" + tmp  [1] + " " +
 					tmp  [4] + ":" + tmp [5] + ":" + tmp [6];
